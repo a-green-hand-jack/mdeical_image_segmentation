@@ -12,4 +12,7 @@ class DRIVEDataCollator:
         images = torch.stack(images, dim=0)
         masks = torch.stack(masks, dim=0)
 
-        return {"images": images, "masks": masks}
+        return {"images": images, "labels": masks}
+    
+class BUSIDataCollator(DRIVEDataCollator):
+    pass

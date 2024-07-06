@@ -178,7 +178,10 @@ class UNet(nn.Module):
         #     nn.CrossEntropyLoss() if out_channels > 1 else nn.BCEWithLogitsLoss()
         # )
 
-    def forward(self, images: torch.Tensor, masks: torch.Tensor):
+    def forward(
+        self,
+        images: torch.Tensor,
+    ):
         """
         :param x: input image
         """
@@ -208,15 +211,8 @@ class UNet(nn.Module):
 
         # Final $1 \times 1$ convolution layer
         x = self.final_conv(x)
-
-        #
         return x
-        # loss = None
-        # if masks is not None:
-        #     loss = self.criterion(x, masks)
 
-        # # return {"loss": loss, "logits": x, "labels": masks}
-        # return UNetModelOutput(loss=loss, logits=x, labels=masks)
 
 
 @dataclass
@@ -233,6 +229,9 @@ class UNetConfig(PretrainedConfig):
         super().__init__(**kwargs)
         self.in_channels = in_channels
         self.out_channels = out_channels
+        self.label_names = "labels"
+        self.main_input_name = "images"
+        self.keys_to_ignore_at_inference = ["labels"]
 
 
 class UNetModel(PreTrainedModel):
@@ -243,10 +242,9 @@ class UNetModel(PreTrainedModel):
             nn.CrossEntropyLoss() if config.out_channels > 1 else nn.BCEWithLogitsLoss()
         )
 
-    def forward(self, images: torch.Tensor, masks: torch.Tensor):
-        unet_output = self.unet(images, masks)
+    def forward(self, images: torch.Tensor, labels: torch.Tensor):
+        unet_output = self.unet(images)
         loss = None
-        if masks is not None:
-            loss = self.criterion(unet_output, masks)
-        return UNetModelOutput(loss=loss, logits=unet_output, labels=masks)
-
+        if labels is not None:
+            loss = self.criterion(unet_output, labels)
+        return UNetModelOutput(loss=loss, logits=unet_output, labels=labels)

@@ -49,14 +49,23 @@ def show(dataset, index, save_path=None):
 
 
 class DRIVEDataset(Dataset):
-    def __init__(self, data_path, augmentations=None):
+    def __init__(self, data_path, augmentations=None, if_train=False):
         super().__init__()
 
         self.images_path = sorted(glob(os.path.join(data_path, "images", "*")))
         self.masks_path = sorted(glob(os.path.join(data_path, "labels", "*")))
         self.n_samples = len(self.images_path)
         # self.augmentations = augmentations
-        self.init_augmentations(augmentations=augmentations)
+        if if_train:
+            print("Using train augmentations")
+            self.init_augmentations(augmentations=augmentations)
+        else:
+            print("Using NO augmentations")
+            self.augmentations = A.Compose(
+                [
+                    ToTensorV2(),
+                ]
+            )
 
         for i in self.masks_path:
             if not os.path.exists(i):
@@ -81,24 +90,6 @@ class DRIVEDataset(Dataset):
             print("Using custom augmentations")
             self.augmentations = augmentations
 
-    def show_and_save_image(self, image, save_path):
-        """
-        # Display and save mask
-        mask_save_path = f"./visualization/mask_{index}.png"
-        os.makedirs(os.path.dirname(mask_save_path), exist_ok=True)
-        self.show_and_save_image(mask, mask_save_path)
-
-        # Display and save image
-        image_save_path = f"./visualization/image_{index}.png"
-        os.makedirs(os.path.dirname(image_save_path), exist_ok=True)
-        self.show_and_save_image(image, image_save_path)
-        """
-        plt.imshow(image)
-        plt.axis("off")
-        plt.savefig(save_path)
-        plt.close()  # Close the plot to release memory
-        print(f"Saved visualization to {save_path}")
-
     def __getitem__(self, index):
         image = Image.open(self.images_path[index]).convert("RGB")
         mask = Image.open(self.masks_path[index]).convert("L")
@@ -120,12 +111,46 @@ class DRIVEDataset(Dataset):
         return self.n_samples
 
 
+class BUSIDataset(DRIVEDataset):
+    def __init__(self, data_path, augmentations=None):
+        super().__init__(data_path, augmentations)
+        self.images_path = sorted(glob(os.path.join(data_path, "images", "*")))
+        self.masks_path = sorted(glob(os.path.join(data_path, "mask", "0", "*")))
+        self.n_samples = len(self.images_path)
+        # self.augmentations = augmentations
+        self.init_augmentations(augmentations=augmentations)
+
+        for i in self.masks_path:
+            if not os.path.exists(i):
+                print(f"file {i} does not exist.")
+
+    def __getitem__(self, index):
+        # print(self.images_path[index])
+        image = Image.open(self.images_path[index]).convert("L")
+        mask = Image.open(self.masks_path[index]).convert("L")
+        # Convert to numpy arrays
+        image = np.array(image)
+        mask = np.array(mask)
+        # Apply augmentations
+        if self.augmentations:
+            augmented = self.augmentations(image=image, mask=mask)
+            image = augmented["image"]
+            mask = augmented["mask"]
+        # Normalize and convert to tensor
+        image = image.float() / 255.0
+        mask = mask.float().unsqueeze(0) / 255.0
+
+        return {"image": image, "mask": mask}
+
+
 if __name__ == "__main__":
     # 定义增强变换
     augmentations = None
 
     # 使用增强方法创建数据集
-    data_path = "../../Dataset/DRIVE/training"
-    dataset = DRIVEDataset(data_path, augmentations=augmentations)
+    # data_path = "../../Dataset/DRIVE/training"
+    # dataset = DRIVEDataset(data_path, augmentations=augmentations)
+    data_path = "../../Dataset/BUSI/"
+    dataset = BUSIDataset(data_path, augmentations=augmentations)
     # 示例用法
-    show(dataset, 10, "./visualization.png")
+    show(dataset, 15, "./BUSI_visualization.png")

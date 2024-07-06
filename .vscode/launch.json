@@ -46,7 +46,8 @@
             "connect": {
                 "host": "localhost",
                 "port": 7925
-            }
+            },
+            "justMyCode": false
         },
         
     ]
