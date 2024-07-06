@@ -1,2 +1,2 @@
-from . import UNet
-from .UNet import SampleUNet, ResUNet, ResNet34Unet
+from . import unet
+from .unet import UNet

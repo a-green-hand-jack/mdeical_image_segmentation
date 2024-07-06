@@ -39,6 +39,15 @@
                 "port": 9925
             }
         },
+        {
+            "name": "trainer",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 7925
+            }
+        },
         
     ]
 }
