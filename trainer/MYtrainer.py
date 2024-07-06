@@ -11,11 +11,11 @@ class CustomTrainer(Trainer):
         return (loss, outputs) if return_outputs else loss
 
 def compute_metrics(p):
-    pred_logits = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
+    pred_logits = p.labels
     pred_probs = torch.sigmoid(torch.tensor(pred_logits))
     pred_labels = (pred_probs > 0.5).float().numpy()
 
-    true_labels = p.label_ids
+    true_labels = p.labels
 
     # Flatten arrays
     pred_labels = pred_labels.flatten()

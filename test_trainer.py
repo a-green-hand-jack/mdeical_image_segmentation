@@ -1,12 +1,11 @@
-import matplotlib.pyplot as plt
 import os
 import torch
 import numpy as np
 
 from data import DRIVEDataset, DRIVEDataCollator
-from model import UNet
+from model import UNet, UNetModel, UNetConfig
 
-from transformers import TrainingArguments, Trainer
+from transformers import TrainingArguments, Trainer, LlamaModel
 from trainer import CustomTrainer, compute_metrics
 
 import debugpy
@@ -31,14 +30,17 @@ training_args = TrainingArguments(
     eval_steps=10,
     logging_dir="./logs",
     num_train_epochs=10,
-    per_device_train_batch_size=4,
-    per_device_eval_batch_size=4,
+    per_device_train_batch_size=2,
+    per_device_eval_batch_size=2,
     save_steps=10,
     save_total_limit=2,
     remove_unused_columns=False,
 )
 
-model = UNet(in_channels=3, out_channels=1)
+config = UNetConfig(in_channels=3, out_channels=1)
+model = UNetModel(config)
+
+# model = UNet(in_channels=3, out_channels=1)
 
 trainer = CustomTrainer(
     model=model,
@@ -49,4 +51,7 @@ trainer = CustomTrainer(
     compute_metrics=compute_metrics,
 )
 
+# 训练模型
 trainer.train()
+# 评估模型
+trainer.evaluate()

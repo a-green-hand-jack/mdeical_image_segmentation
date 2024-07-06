@@ -28,6 +28,9 @@ on [Carvana dataset](carvana.html).
 import torch
 import torchvision.transforms.functional
 from torch import nn
+from transformers.utils import ModelOutput
+from transformers import PretrainedConfig, PreTrainedModel
+from dataclasses import dataclass
 
 
 class DoubleConvolution(nn.Module):
@@ -171,9 +174,9 @@ class UNet(nn.Module):
         # Final $1 \times 1$ convolution layer to produce the output
         self.final_conv = nn.Conv2d(64, out_channels, kernel_size=1)
 
-        self.criterion = (
-            nn.CrossEntropyLoss() if out_channels > 1 else nn.BCEWithLogitsLoss()
-        )
+        # self.criterion = (
+        #     nn.CrossEntropyLoss() if out_channels > 1 else nn.BCEWithLogitsLoss()
+        # )
 
     def forward(self, images: torch.Tensor, masks: torch.Tensor):
         """
@@ -207,9 +210,43 @@ class UNet(nn.Module):
         x = self.final_conv(x)
 
         #
-        # return x
+        return x
+        # loss = None
+        # if masks is not None:
+        #     loss = self.criterion(x, masks)
+
+        # # return {"loss": loss, "logits": x, "labels": masks}
+        # return UNetModelOutput(loss=loss, logits=x, labels=masks)
+
+
+@dataclass
+class UNetModelOutput(ModelOutput):
+    loss: torch.FloatTensor = None
+    logits: torch.FloatTensor = None
+    labels: torch.LongTensor = None
+
+
+class UNetConfig(PretrainedConfig):
+    model_type = "unet"
+
+    def __init__(self, in_channels=1, out_channels=1, **kwargs):
+        super().__init__(**kwargs)
+        self.in_channels = in_channels
+        self.out_channels = out_channels
+
+
+class UNetModel(PreTrainedModel):
+    def __init__(self, config: UNetConfig):
+        super().__init__(config)
+        self.unet = UNet(config.in_channels, config.out_channels)
+        self.criterion = (
+            nn.CrossEntropyLoss() if config.out_channels > 1 else nn.BCEWithLogitsLoss()
+        )
+
+    def forward(self, images: torch.Tensor, masks: torch.Tensor):
+        unet_output = self.unet(images, masks)
         loss = None
         if masks is not None:
-            loss = self.criterion(x, masks)
+            loss = self.criterion(unet_output, masks)
+        return UNetModelOutput(loss=loss, logits=unet_output, labels=masks)
 
-        return {"loss": loss, "logits": x}
