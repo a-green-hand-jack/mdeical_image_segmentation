@@ -3,7 +3,7 @@ import torch
 import numpy as np
 
 from data import DRIVEDataset, DRIVEDataCollator, BUSIDataset, BUSIDataCollator
-from model import UNet, UNetModel, UNetConfig
+from model import UNetModel, UNetConfig
 
 from transformers import TrainingArguments, Trainer, LlamaModel
 from trainer import CustomTrainer, compute_metrics
@@ -37,15 +37,15 @@ training_args = TrainingArguments(
     logging_dir="./logs",
     logging_steps=100,
     num_train_epochs=5000,
-    per_device_train_batch_size=2,
-    per_device_eval_batch_size=2,
+    per_device_train_batch_size=1,
+    per_device_eval_batch_size=1,
     save_steps=1000,
     save_total_limit=5,
     remove_unused_columns=False,
     label_names=["labels"]
 )
 
-config = UNetConfig(in_channels=3, out_channels=1)
+config = UNetConfig(in_channels=3, out_channels=1, unet_type="UNet")
 model = UNetModel(config)
 
 # model = UNet(in_channels=3, out_channels=1)
