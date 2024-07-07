@@ -1179,6 +1179,7 @@ class UNetModel(PreTrainedModel):
     def __init__(self, config: UNetConfig):
         super().__init__(config)
         if config.unet_type == "UNet":
+            print("use the UNet")
             self.unet = UNet(config.in_channels, config.out_channels)
             self.criterion = (
                 nn.CrossEntropyLoss()
@@ -1186,9 +1187,11 @@ class UNetModel(PreTrainedModel):
                 else nn.BCEWithLogitsLoss()
             )
         elif config.unet_type == "UNet_3Plus":
+            print("use the UNet 3Puls")
             self.unet = UNet_3Plus(config.in_channels, config.out_channels)
             self.criterion = SegmentationLoss()
         elif config.unet_type == "UNet_3Plus_DeepSup":
+            print("use the UNet 3Plus Deep Sup")
             self.unet = UNet_3Plus_DeepSup(config.in_channels, config.out_channels)
             self.criterion = SegmentationLoss()
             

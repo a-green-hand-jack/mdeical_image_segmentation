@@ -5,7 +5,7 @@ import numpy as np
 from data import DRIVEDataset, DRIVEDataCollator, BUSIDataset, BUSIDataCollator
 from model import UNetModel, UNetConfig
 
-from transformers import TrainingArguments, Trainer, LlamaModel
+from transformers import TrainingArguments, Trainer, LlamaModel, TrainerCallback
 from trainer import CustomTrainer, compute_metrics
 from torch.utils.data import Dataset, DataLoader, Subset
 import debugpy
@@ -42,13 +42,16 @@ training_args = TrainingArguments(
     save_steps=1000,
     save_total_limit=5,
     remove_unused_columns=False,
-    label_names=["labels"]
+    label_names=["labels"],
+    warmup_ratio=0.001,
+    learning_rate=0.005,
+    weight_decay=0.001,
+    metric_for_best_model="iou",
 )
 
-config = UNetConfig(in_channels=3, out_channels=1, unet_type="UNet")
+config = UNetConfig(in_channels=3, out_channels=1, unet_type="UNet_3Plus")
 model = UNetModel(config)
 
-# model = UNet(in_channels=3, out_channels=1)
 
 trainer = CustomTrainer(
     model=model,
@@ -57,6 +60,7 @@ trainer = CustomTrainer(
     eval_dataset=eval_dataset,
     data_collator=data_collator,
     compute_metrics=compute_metrics,
+    # callbacks=[best_iou_callback],
 )
 
 # 训练模型
