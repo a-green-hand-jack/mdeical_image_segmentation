@@ -24,34 +24,22 @@ import debugpy
 # train_dataset = BUSIDataset(data_path="../Dataset/BUSI")
 # eval_dataset = BUSIDataset(data_path="../Dataset/BUSI")
 # data_collator = BUSIDataCollator()
-train_eval_dataset = DRIVEDataset(data_path="../Dataset/DRIVE/training")
-# 假设数据集有N个样本，我们想要拆分为80%的训练集和20%的验证集
-N = len(train_eval_dataset)
-indices = list(range(N))
-np.random.shuffle(indices)  # 随机打乱索引
-
-split_idx = int(N * 0.8)  # 计算拆分点
-
-# 创建训练集和验证集的索引
-train_indices, eval_indices = indices[:split_idx], indices[split_idx:]
-# 使用Subset来创建训练集和验证集
-train_dataset = Subset(train_eval_dataset, train_indices)
-eval_dataset = Subset(train_eval_dataset, eval_indices)
-
+train_dataset = DRIVEDataset(data_path="../Dataset/DRIVE/training")
+eval_dataset = DRIVEDataset(data_path="../Dataset/DRIVE/training", mode="eval")
 # 建立对应的测试数据集
-test_dataset = DRIVEDataset(data_path="../Dataset/DRIVE/test")
+test_dataset = DRIVEDataset(data_path="../Dataset/DRIVE/test", mode="test")
 data_collator = DRIVEDataCollator()
 
 training_args = TrainingArguments(
     output_dir="./results",
-    evaluation_strategy="epoch",
-    eval_steps=1,
+    evaluation_strategy="steps",
+    eval_steps=100,
     logging_dir="./logs",
-    logging_steps=1,
+    logging_steps=100,
     num_train_epochs=5000,
-    per_device_train_batch_size=24,
-    per_device_eval_batch_size=24,
-    save_steps=1,
+    per_device_train_batch_size=2,
+    per_device_eval_batch_size=2,
+    save_steps=1000,
     save_total_limit=5,
     remove_unused_columns=False,
     label_names=["labels"]

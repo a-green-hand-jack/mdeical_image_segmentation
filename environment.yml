@@ -1,0 +1,6 @@
+name: drivedataset_env
+channels:
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main/
+  - https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/free/
+  - defaults
+prefix: /root/anaconda3/envs/drivedataset_env

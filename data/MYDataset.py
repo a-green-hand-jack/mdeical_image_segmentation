@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
 
 import debugpy
 
@@ -49,32 +50,65 @@ def show(dataset, index, save_path=None):
 
 
 class DRIVEDataset(Dataset):
-    def __init__(self, data_path, augmentations=None, if_train=False):
+    def __init__(
+        self,
+        data_path,
+        augmentations=None,
+        mode="train",
+        train_ratio=0.7,
+        eval_ratio=0.2,
+        random_seed=42,
+    ):
         super().__init__()
 
         self.images_path = sorted(glob(os.path.join(data_path, "images", "*")))
         self.masks_path = sorted(glob(os.path.join(data_path, "labels", "*")))
-        self.n_samples = len(self.images_path)
-        # self.augmentations = augmentations
-        if if_train:
-            print("Using train augmentations")
+
+        if not len(self.images_path) == len(self.masks_path):
+            raise ValueError("The number of images and masks do not match.")
+
+        # Split the dataset into train, eval, test sets
+        train_images, temp_images, train_masks, temp_masks = train_test_split(
+            self.images_path,
+            self.masks_path,
+            test_size=(1 - train_ratio),
+            random_state=random_seed,
+        )
+        eval_size = eval_ratio / (1 - train_ratio)
+        eval_images, test_images, eval_masks, test_masks = train_test_split(
+            temp_images, temp_masks, test_size=(1 - eval_size), random_state=random_seed
+        )
+
+        if mode == "train":
+            self.images_path, self.masks_path = train_images, train_masks
             self.init_augmentations(augmentations=augmentations)
-        else:
-            print("Using NO augmentations")
+        elif mode == "eval":
+            self.images_path, self.masks_path = eval_images, eval_masks
             self.augmentations = A.Compose(
                 [
+                    A.Resize(512, 512, interpolation=Image.Resampling.NEAREST),
                     ToTensorV2(),
                 ]
             )
+        elif mode == "test":
+            self.images_path, self.masks_path = test_images, test_masks
+            self.augmentations = A.Compose(
+                [
+                    A.Resize(512, 512, interpolation=Image.Resampling.NEAREST),
+                    ToTensorV2(),
+                ]
+            )
+        else:
+            raise ValueError("Mode should be 'train', 'eval', or 'test'.")
+
+        self.n_samples = len(self.images_path)
 
         for i in self.masks_path:
             if not os.path.exists(i):
                 print(f"file {i} does not exist.")
 
     def init_augmentations(self, augmentations=None):
-        # 定义增强变换
         if augmentations is None:
-            print("Using default augmentations")
             self.augmentations = A.Compose(
                 [
                     A.Resize(512, 512, interpolation=Image.Resampling.NEAREST),
@@ -87,21 +121,19 @@ class DRIVEDataset(Dataset):
                 ]
             )
         else:
-            print("Using custom augmentations")
             self.augmentations = augmentations
 
     def __getitem__(self, index):
         image = Image.open(self.images_path[index]).convert("RGB")
         mask = Image.open(self.masks_path[index]).convert("L")
-        # Convert to numpy arrays
         image = np.array(image)
         mask = np.array(mask)
-        # Apply augmentations
+
         if self.augmentations:
             augmented = self.augmentations(image=image, mask=mask)
             image = augmented["image"]
             mask = augmented["mask"]
-        # Normalize and convert to tensor
+
         image = image.float() / 255.0
         mask = mask.float().unsqueeze(0) / 255.0
 

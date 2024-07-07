@@ -7,7 +7,7 @@ from medpy import metric
 import torch
 
 
-def plot_first_element(array1, array2, threshold=0.5):
+def plot_first_element(array1, array2, threshold=0.5, save_path="output.png"):
     """
     绘制两个形状为 (N, H, W) 的 NumPy 数组的第一个元素的灰阶图。
 
@@ -51,10 +51,11 @@ def plot_first_element(array1, array2, threshold=0.5):
     plt.title("Array 2 - First Element")
     plt.imshow(first_element_array2, cmap="gray")
     plt.axis("off")  # 隐藏坐标轴
-    plt.savefig("output.png")
+    if save_path is not None:
+        plt.savefig(save_path)
+    else:
+        plt.show()
 
-    # 显示图像
-    plt.show()
 
 
 def compute_iou(preds, labels, threshold=0.5):
