@@ -2,8 +2,8 @@ import os
 import torch
 import numpy as np
 
-from data import DRIVEDataset, DRIVEDataCollator, BUSIDataset, BUSIDataCollator
-from model import UNetModel, UNetConfig
+from unet2d_dataset import DRIVEDataset, DRIVEDataCollator, BUSIDataset, BUSIDataCollator
+from unet2d import UNetModel, UNetConfig
 
 from transformers import TrainingArguments, Trainer, LlamaModel, TrainerCallback
 from trainer import CustomTrainer, compute_metrics

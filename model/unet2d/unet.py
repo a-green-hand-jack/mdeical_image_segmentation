@@ -32,7 +32,7 @@ import torch.nn.functional as F
 import numpy as np
 
 from transformers.utils import ModelOutput
-from transformers import PretrainedConfig, PreTrainedModel
+from transformers import PretrainedConfig, PreTrainedModel, LlamaForSequenceClassification
 from dataclasses import dataclass
 
 from .layers import DoubleConvolution, DownSample, UpSample, CropAndConcat, unetConv2
