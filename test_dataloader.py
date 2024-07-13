@@ -4,7 +4,7 @@ from torchvision.transforms.functional import to_tensor
 from PIL import Image
 import os
 import numpy as np
-from data import DRIVEDataCollator, DRIVEDataset
+from datasets import DRIVEDataCollator, DRIVEDataset
 
 import debugpy
 

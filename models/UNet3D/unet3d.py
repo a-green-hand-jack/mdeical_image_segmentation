@@ -240,10 +240,10 @@ class UNet3dConfig(PretrainedConfig):
 
         self.loss_config = loss_config
 
-        self.block = Bottleneck
-        self.shortcut_type = "B"
-        self.no_cuda = True
-        self.bilinear = True
+        self.block = Bottleneck     # 使用确定的残差块类型
+        self.shortcut_type = "B"    # 保证总是使用Shortcut-B实现残差连接，也就是用卷积网络实现下采样
+        self.no_cuda = False    # 保证总是使用cuda加速
+        self.bilinear = False   # 保证总是使用 反卷积 来上采样，而不是使用 双线性 上采样
 
         self.label_names = "labels"
         self.main_input_name = "volumes"

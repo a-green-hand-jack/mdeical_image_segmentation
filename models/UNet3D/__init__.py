@@ -1,5 +1,5 @@
 from . import unet3d, layers3d, losses3d
-from .unet3d import UNet_3d
+from .unet3d import UNet3DModel, UNet3dConfig
 from .layers3d import (
     DoubleConv_3d,
     Down_3d,

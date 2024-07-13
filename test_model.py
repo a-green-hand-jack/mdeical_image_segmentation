@@ -3,8 +3,8 @@ import os
 import torch
 import numpy as np
 
-from data import DRIVEDataset, DRIVEDataCollator
-from model import UNet
+from datasets import DRIVEDataset, DRIVEDataCollator
+from models import UNet
 import debugpy
 
 try:

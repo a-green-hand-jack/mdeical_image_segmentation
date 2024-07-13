@@ -59,6 +59,16 @@
             },
             "justMyCode": false
         },
+        {
+            "name": "Dataset3D",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 4125
+            },
+            "justMyCode": false
+        },
         
     ]
 }
