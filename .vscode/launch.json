@@ -49,6 +49,16 @@
             },
             "justMyCode": false
         },
+        {
+            "name": "unet3d",
+            "type": "debugpy",
+            "request": "attach",
+            "connect": {
+                "host": "localhost",
+                "port": 1925
+            },
+            "justMyCode": false
+        },
         
     ]
 }
