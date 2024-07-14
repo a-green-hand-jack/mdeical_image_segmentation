@@ -226,6 +226,8 @@ class UNet3dConfig(PretrainedConfig):
         layers=[3, 4, 6, 3],
         unet_type="UNet_3d",
         loss_config: dict = {},
+        final_sigmoid=False,
+        is_segmentation=False,
         **kwargs,
     ):
         """ "
@@ -239,7 +241,9 @@ class UNet3dConfig(PretrainedConfig):
         self.layers = layers
 
         self.loss_config = loss_config
-     
+        self.final_sigmoid = final_sigmoid
+        self.is_segmentation = is_segmentation
+        
         self.shortcut_type = "B"    # 保证总是使用Shortcut-B实现残差连接，也就是用卷积网络实现下采样
         self.no_cuda = False    # 保证总是使用cuda加速
         self.bilinear = False   # 保证总是使用 反卷积 来上采样，而不是使用 双线性 上采样
@@ -282,12 +286,24 @@ class UNet3DModel(PreTrainedModel):
             )
         else:
             raise ValueError("unet_type must be UNet_3d or UNet_3d_resnet_encoder")
+        
         self.criterion = get_loss_criterion(config.loss_config)
+        if config.is_segmentation:
+            # semantic segmentation problem
+            if config.final_sigmoid:
+                self.final_activation = nn.Sigmoid()
+            else:
+                self.final_activation = nn.Softmax(dim=1)
+        else:
+            # regression problem
+            self.final_activation = None
 
     def forward(
         self, volumes: torch.Tensor, labels: torch.Tensor = None
     ) -> UNet3DModelOutput:
         unet3d_output = self.unet(volumes)
+        if self.final_activation is not None:
+            unet3d_output = self.final_activation(unet3d_output)
         if labels is not None:
             loss = self.criterion(unet3d_output, labels)
         return UNet3DModelOutput(loss=loss, logits=unet3d_output, labels=labels)

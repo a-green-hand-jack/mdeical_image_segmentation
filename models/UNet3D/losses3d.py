@@ -1,7 +1,7 @@
 import torch
 import torch.nn.functional as F
 from torch import nn as nn
-
+from monai.losses import DiceCELoss
 
 from typing import Optional,Any,Dict
 
@@ -505,6 +505,8 @@ def _create_loss(
             initial_weight=loss_config['initial_weight'],
             apply_below_threshold=loss_config.get('apply_below_threshold', True)
         )
+    elif name == 'DiceCELoss':  # 参考https://github.com/a-green-hand-jack/SAM-Med3D/blob/main/train.py 中的loss_fn的选择
+        return DiceCELoss(sigmoid=True, squared_pred=True, reduction="mean")
     else:
         raise RuntimeError(f"Unsupported loss function: '{name}'")
 

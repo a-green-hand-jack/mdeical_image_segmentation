@@ -10,14 +10,14 @@ import argparse
 
 import debugpy
 
-# try:
-#     debugpy.listen(("localhost", 4325))
-#     print("Waiting for debugger attach")
-#     print("the python code is train3d.py")
-#     print("the host is: localhost, the port is: 4325")
-#     debugpy.wait_for_client()
-# except Exception as e:
-#     pass
+try:
+    debugpy.listen(("localhost", 4325))
+    print("Waiting for debugger attach")
+    print("the python code is train3d.py")
+    print("the host is: localhost, the port is: 4325")
+    debugpy.wait_for_client()
+except Exception as e:
+    pass
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -167,7 +167,7 @@ if __name__ == "__main__":
         num_channels=args.out_channels,
         unet_type=args.unet_type,
         loss_config={
-            "name": "BCEWithLogitsLoss",
+            "name": "DiceCELoss",
         },
     )
     model = UNet3DModel(config)
