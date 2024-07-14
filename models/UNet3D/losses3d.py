@@ -413,8 +413,8 @@ def get_loss_criterion(config):
     :param config: (dict) a top level configuration object containing the 'loss' key
     :return: an instance of the loss function
     """
-    assert 'loss' in config, 'Could not find loss function configuration'
-    loss_config = config['loss']
+    # assert 'loss' in config, 'Could not find loss function configuration'
+    loss_config = config
     name = loss_config.pop('name')
 
     ignore_index = loss_config.pop('ignore_index', None)

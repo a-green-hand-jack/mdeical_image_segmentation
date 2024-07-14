@@ -20,7 +20,7 @@ OUT_CHANNELS=1
 UNET_TYPE="UNet_3Plus"
 
 # Run the Python script with predefined arguments
-python3 train.py \
+python3 train2d.py \
     --output_dir "$OUTPUT_DIR" \
     --evaluation_strategy "$EVAL_STRATEGY" \
     --eval_steps "$EVAL_STEPS" \

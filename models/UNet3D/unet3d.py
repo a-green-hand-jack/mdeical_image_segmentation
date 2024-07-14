@@ -6,7 +6,7 @@ from transformers import PretrainedConfig, PreTrainedModel
 from transformers.utils import ModelOutput
 from dataclasses import dataclass
 
-from layers3d import (
+from .layers3d import (
     DoubleConv_3d,
     Down_3d,
     Up_3d,
@@ -14,18 +14,18 @@ from layers3d import (
     Bottleneck,
     downsample_basic_block,
 )
-from losses3d import get_loss_criterion
+from .losses3d import get_loss_criterion
 
 import debugpy
 
-try:
-    debugpy.listen(("localhost", 1925))
-    print("Waiting for debugger attach")
-    print("the python code is unet3d.py")
-    print("the host is: localhost, the port is: 1925")
-    debugpy.wait_for_client()
-except Exception as e:
-    pass
+# try:
+#     debugpy.listen(("localhost", 1925))
+#     print("Waiting for debugger attach")
+#     print("the python code is unet3d.py")
+#     print("the host is: localhost, the port is: 1925")
+#     debugpy.wait_for_client()
+# except Exception as e:
+#     pass
 
 
 class UNet_3d(nn.Module):
@@ -239,8 +239,7 @@ class UNet3dConfig(PretrainedConfig):
         self.layers = layers
 
         self.loss_config = loss_config
-
-        self.block = Bottleneck     # 使用确定的残差块类型
+     
         self.shortcut_type = "B"    # 保证总是使用Shortcut-B实现残差连接，也就是用卷积网络实现下采样
         self.no_cuda = False    # 保证总是使用cuda加速
         self.bilinear = False   # 保证总是使用 反卷积 来上采样，而不是使用 双线性 上采样
@@ -272,7 +271,7 @@ class UNet3DModel(PreTrainedModel):
         elif config.unet_type == "UNet_3d_resnet_encoder":
             print("use the UNet_3d_resnet_encoder")
             self.unet = UNet_3d_resnet_encoder(
-                block=config.in_channels,
+                block=Bottleneck,   # 使用确定的残差块类型
                 layers=config.layers,
                 in_channels=config.in_channels,
                 num_classes=config.num_channels,
