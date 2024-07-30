@@ -8,7 +8,7 @@ import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import matplotlib.pyplot as plt
 from sklearn.model_selection import train_test_split
-
+# from dataclasses import DAtaset
 import debugpy
 
 # try:
@@ -59,14 +59,28 @@ class DRIVEDataset(Dataset):
         eval_ratio=0.2,
         random_seed=42,
     ):
+        """
+        初始化数据集。
+        
+        参数:
+        data_path: 数据集根目录路径。
+        augmentations: 训练时的数据增强策略列表。
+        mode: 数据集的使用模式，可选值为"train"、"eval"和"test"。
+        train_ratio: 训练集占总数据集的比例。
+        eval_ratio: 评估集占总数据集的比例。
+        random_seed: 随机种子，用于确保数据集分割的可复现性。
+        """
         super().__init__()
 
+        # 获取并排序图像和掩码路径
         self.images_path = sorted(glob(os.path.join(data_path, "images", "*")))
         self.masks_path = sorted(glob(os.path.join(data_path, "labels", "*")))
 
+        # 检查图像和掩码的数量是否匹配
         if not len(self.images_path) == len(self.masks_path):
             raise ValueError("The number of images and masks do not match.")
 
+        # 将数据集分割为训练集、评估集和测试集
         # Split the dataset into train, eval, test sets
         train_images, temp_images, train_masks, temp_masks = train_test_split(
             self.images_path,
@@ -79,6 +93,7 @@ class DRIVEDataset(Dataset):
             temp_images, temp_masks, test_size=(1 - eval_size), random_state=random_seed
         )
 
+        # 根据模式设置数据集路径和数据增强
         if mode == "train":
             self.images_path, self.masks_path = train_images, train_masks
             self.init_augmentations(augmentations=augmentations)
@@ -101,8 +116,10 @@ class DRIVEDataset(Dataset):
         else:
             raise ValueError("Mode should be 'train', 'eval', or 'test'.")
 
+        # 记录数据集样本数量
         self.n_samples = len(self.images_path)
 
+        # 检查掩码路径是否存在
         for i in self.masks_path:
             if not os.path.exists(i):
                 print(f"file {i} does not exist.")
